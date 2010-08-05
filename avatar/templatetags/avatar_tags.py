@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
 from avatar.settings import (AVATAR_GRAVATAR_BACKUP, AVATAR_GRAVATAR_DEFAULT,
-                             AVATAR_DEFAULT_SIZE)
+                             AVATAR_DEFAULT_SIZE, AVATAR_CROP_VIEW_SIZE)
 from avatar.util import get_primary_avatar, get_default_avatar_url, cache_result
 
 register = template.Library()
@@ -45,7 +45,7 @@ def avatar(user, size=AVATAR_DEFAULT_SIZE):
     else:
         alt = unicode(user)
         url = avatar_url(user, size)
-    return """<img src="%s" alt="%s" width="%s" height="%s" />""" % (url, alt,
+    return """<img src="%s" alt="%s" width="%s" height="%s"/>""" % (url, alt,
         size, size)
 
 @cache_result
@@ -67,5 +67,17 @@ def primary_avatar(user, size=AVATAR_DEFAULT_SIZE):
 def render_avatar(avatar, size=AVATAR_DEFAULT_SIZE):
     if not avatar.thumbnail_exists(size):
         avatar.create_thumbnail(size)
-    return """<img src="%s" alt="%s" width="%s" height="%s" />""" % (
+    return """<img src="%s" alt="%s" width="%s" height="%s"/>""" % (
         avatar.avatar_url(size), str(avatar), size, size)
+
+@cache_result
+@register.simple_tag
+def render_orig_avatar(avatar, display_size):
+    return """<img src="%s" alt="%s" width="%s" height="%s" id="crop_avatar"/>""" % (
+        avatar.avatar.url, str(avatar), display_size[0], display_size[1])
+
+@cache_result
+@register.simple_tag
+def render_crop_preview(avatar, preview_size):
+    return """<div class="avatar_crop_preview" style="width:%dpx; height:%dpx; overflow:hidden;"><img src="%s" alt="%s" id="crop_preview"/></div>""" % (
+        preview_size[0], preview_size[1], avatar.avatar.url, str(avatar)+" preview")

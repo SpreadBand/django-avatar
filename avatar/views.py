@@ -1,14 +1,16 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
+from django.core.urlresolvers import reverse
+
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 
-from avatar.forms import PrimaryAvatarForm, DeleteAvatarForm, UploadAvatarForm
+from avatar.forms import PrimaryAvatarForm, DeleteAvatarForm, UploadAvatarForm, CropAvatarForm
 from avatar.models import Avatar
-from avatar.settings import AVATAR_MAX_AVATARS_PER_USER, AVATAR_DEFAULT_SIZE
+from avatar.settings import AVATAR_MAX_AVATARS_PER_USER, AVATAR_DEFAULT_SIZE, AVATAR_CROP_VIEW_SIZE
 from avatar.util import get_primary_avatar, get_default_avatar_url
 
 notification = False
@@ -86,21 +88,65 @@ def add(request, extra_context=None, next_override=None,
             avatar.avatar.save(image_file.name, image_file)
             avatar.save()
             request.user.message_set.create(
-                message=_("Successfully uploaded a new avatar."))
+                message=_("Successfully uploaded avatar."))
             if notification:
                 _notification_updated(request, avatar)
             return HttpResponseRedirect(next_override or _get_next(request))
     return render_to_response(
-            'avatar/add.html',
-            extra_context,
-            context_instance = RequestContext(
-                request,
-                { 'avatar': avatar, 
-                  'avatars': avatars, 
-                  'upload_avatar_form': upload_avatar_form,
-                  'next': next_override or _get_next(request), }
-            )
+        'avatar/add.html',
+        extra_context,
+        context_instance = RequestContext(
+            request,
+            { 'avatar': avatar, 
+              'avatars': avatars, 
+              'upload_avatar_form': upload_avatar_form,
+              'next': next_override or _get_next(request), }
         )
+    )
+
+@login_required
+def crop(request, avatar_id, extra_context=None, next_override=None,
+        crop_form=CropAvatarForm, *args, **kwargs):
+    if extra_context is None:
+        extra_context = {}
+
+    avatar = get_object_or_404(request.user.avatar_set, pk=avatar_id)
+    crop_avatar_form = crop_form(request.POST or None)
+
+    if request.method == "POST":
+        if crop_avatar_form.is_valid():
+            print "POST", request.POST
+            avatar.set_crop(request.POST)
+            avatar.save()
+            request.user.message_set.create(
+                message=_("Successfully edited avatar."))
+            if notification:
+                _notification_updated(request, avatar)
+            return HttpResponseRedirect(next_override or _get_next(request))
+    
+    (w, h) = (avatar.avatar.width, avatar.avatar.height)
+    if w>h:
+        d_w = AVATAR_CROP_VIEW_SIZE
+        d_h = int(AVATAR_CROP_VIEW_SIZE * float(h)/w)
+    else:
+        d_w = int(AVATAR_CROP_VIEW_SIZE * float(w)/h)
+        d_h = AVATAR_CROP_VIEW_SIZE
+
+    return render_to_response(
+        'avatar/crop.html',
+        extra_context,
+        context_instance = RequestContext(
+            request,
+            { 'avatar': avatar, 
+              'crop_avatar_form': crop_avatar_form,
+              'orig_size': (w, h),
+              'display_size': (d_w, d_h),
+              'preview_size': (AVATAR_DEFAULT_SIZE,AVATAR_DEFAULT_SIZE),
+              'initial_crop': min(d_w, d_h),
+              'next': next_override or _get_next(request), }
+        )
+    )
+
 
 @login_required
 def change(request, extra_context=None, next_override=None,

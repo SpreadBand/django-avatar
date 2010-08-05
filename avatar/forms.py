@@ -57,6 +57,18 @@ class PrimaryAvatarForm(forms.Form):
             choices=[(c.id, avatar_img(c, size)) for c in avatars],
             widget=widgets.RadioSelect)
 
+class CropAvatarForm(forms.ModelForm):
+    crop_top = forms.IntegerField(required=True, widget=forms.HiddenInput, min_value=0)
+    crop_left = forms.IntegerField(required=True, widget=forms.HiddenInput, min_value=0)
+    crop_bottom = forms.IntegerField(required=True, widget=forms.HiddenInput, min_value=0)
+    crop_right = forms.IntegerField(required=True, widget=forms.HiddenInput, min_value=0)
+
+    class Meta:
+        model = Avatar
+        fields = ('crop_top', 'crop_left', 'crop_bottom', 'crop_right')
+
+
+
 class DeleteAvatarForm(forms.Form):
 
     def __init__(self, *args, **kwargs):

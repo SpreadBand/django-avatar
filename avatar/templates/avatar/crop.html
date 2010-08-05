@@ -1,0 +1,48 @@
+{% extends "avatar/base.html" %}
+{% load i18n avatar_tags %}
+
+
+{% block head %}
+<script type="text/javascript" src="{{MEDIA_URL}}avatar/js/jquery.js"></script>
+<script type="text/javascript" src="{{MEDIA_URL}}avatar/js/jquery.imgareaselect.js"></script>
+<link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}avatar/css/imgareaselect-animated.css"/>
+<script type="text/javascript">
+function preview(img, selection) {
+    left = selection.x1 * {{orig_size.0}} / {{display_size.0}};
+    right = selection.x2 * {{orig_size.0}} / {{display_size.0}};
+    top = selection.y1 * {{orig_size.1}} / {{display_size.1}};
+    bottom = selection.y2 * {{orig_size.1}} / {{display_size.1}};
+    scaleX = {{preview_size.0}} / (right - left);
+    scaleY = {{preview_size.1}} / (bottom - top);
+    $("#crop_preview").css({
+        width: Math.round({{orig_size.0}} * scaleX) + "px",
+        height: Math.round({{orig_size.1}} * scaleY) + "px",
+        marginLeft: "-" + Math.round(scaleX * left) + "px",
+        marginTop: "-" + Math.round(scaleY * top) + "px"
+    });
+    $("#id_crop_top").val(Math.round(top));
+    $("#id_crop_left").val(Math.round(left));
+    $("#id_crop_bottom").val(Math.round(bottom));
+    $("#id_crop_right").val(Math.round(right));
+}
+
+$(window).load(function () {
+    $("#crop_avatar").imgAreaSelect({ aspectRatio: "1:1", onSelectChange: preview, onInit: preview, handles: true, x1:"0", y1:"0", x2:"{{initial_crop}}",y2:"{{initial_crop}}"});
+});
+</script>
+{% endblock %}
+
+{% block content %}
+    <p>{% trans "Your current cropping:" %}</p>
+    {% render_avatar avatar %}
+
+    <p>{% trans "Please crop your avatar:" %}</p>
+    {% render_orig_avatar avatar display_size %}
+    <p>{% trans "Preview:" %}</p>
+    {% render_crop_preview avatar preview_size %}
+
+    <form enctype="multipart/form-data" method="POST" action="{% url avatar_crop avatar.id %}">
+        {{ crop_avatar_form.as_p }}
+        <p>{% csrf_token %}<input type="submit" value="{% trans "Save avatar" %}" /></p>
+    </form>
+{% endblock %}

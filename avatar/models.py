@@ -7,6 +7,7 @@ from django.utils.translation import ugettext as _
 from django.utils.hashcompat import md5_constructor
 from django.utils.encoding import smart_str
 from django.db.models import signals
+from avatar.settings import AVATAR_DEFAULT_SIZE
 
 from django.contrib.auth.models import User
 
@@ -70,7 +71,11 @@ class Avatar(models.Model):
     primary = models.BooleanField(default=False)
     avatar = models.ImageField(max_length=1024, upload_to=avatar_file_path, blank=True)
     date_uploaded = models.DateTimeField(default=datetime.datetime.now)
-    
+    crop_top = models.PositiveIntegerField(blank=True, null=True)
+    crop_left = models.PositiveIntegerField(blank=True, null=True)
+    crop_bottom = models.PositiveIntegerField(blank=True, null=True)
+    crop_right = models.PositiveIntegerField(blank=True, null=True)
+
     def __unicode__(self):
         return _(u'Avatar for %s') % self.user
     
@@ -94,6 +99,18 @@ class Avatar(models.Model):
     def thumbnail_exists(self, size):
         return self.avatar.storage.exists(self.avatar_name(size))
     
+    def set_crop(self, crop):
+        self.crop_top = crop['crop_top']
+        self.crop_left = crop['crop_left']
+        self.crop_bottom = crop['crop_bottom']
+        self.crop_right = crop['crop_right']
+        # TODO: delete *ALL* thumbnails instead of just the auto sizes
+        for size in AUTO_GENERATE_AVATAR_SIZES:
+            self.delete_thumbnail(size)
+
+    def has_crop(self):
+        return not (self.crop_top is None or self.crop_left is None or self.crop_bottom is None or self.crop_right is None)
+
     def create_thumbnail(self, size, quality=None):
         # invalidate the cache of the thumbnail with the given size first
         invalidate_cache(self.user, size)
@@ -103,23 +120,34 @@ class Avatar(models.Model):
         except IOError:
             return # What should we do here?  Render a "sorry, didn't work" img?
         quality = quality or AVATAR_THUMB_QUALITY
+
         (w, h) = image.size
-        if w != size or h != size:
-            if w > h:
-                diff = (w - h) / 2
-                image = image.crop((diff, 0, w - diff, h))
+        if w == size and h == size and not self.has_crop:
+            thumb_file = ContentFile(orig)
+        else:
+            if self.has_crop:
+                image = image.crop((self.crop_left, self.crop_top, self.crop_right, self.crop_bottom))
             else:
-                diff = (h - w) / 2
-                image = image.crop((0, diff, w, h - diff))
+                if w != size or h != size:
+                    if w > h:
+                        diff = (w - h) / 2
+                        image = image.crop((diff, 0, w - diff, h))
+                    else:
+                        diff = (h - w) / 2
+                        image = image.crop((0, diff, w, h - diff))
             if image.mode != "RGB":
                 image = image.convert("RGB")
             image = image.resize((size, size), AVATAR_RESIZE_METHOD)
             thumb = StringIO()
             image.save(thumb, AVATAR_THUMB_FORMAT, quality=quality)
             thumb_file = ContentFile(thumb.getvalue())
-        else:
-            thumb_file = ContentFile(orig)
+
         thumb = self.avatar.storage.save(self.avatar_name(size), thumb_file)
+
+    def delete_thumbnail(self, size):
+        # invalidate the cache of the thumbnail with the given size first
+        invalidate_cache(self.user, size)
+        self.avatar.storage.delete(self.avatar_name(size))
 
     def avatar_url(self, size):
         return self.avatar.storage.url(self.avatar_name(size))
@@ -137,5 +165,6 @@ def create_default_thumbnails(instance=None, created=False, **kwargs):
     if created:
         for size in AUTO_GENERATE_AVATAR_SIZES:
             instance.create_thumbnail(size)
+
 
 signals.post_save.connect(create_default_thumbnails, sender=Avatar)
