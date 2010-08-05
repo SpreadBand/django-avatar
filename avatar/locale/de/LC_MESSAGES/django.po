@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-16 15:19+0100\n"
+"POT-Creation-Date: 2010-08-05 15:38+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: forms.py:33
+#: forms.py:34
 #, python-format
 msgid ""
 "%(ext)s is an invalid file extension. Authorized extensions are : %"
@@ -26,7 +26,7 @@ msgstr ""
 "%(ext)s ist ein ungültiges Dateiformat. Erlaubte Formate sind: %"
 "(valid_exts_list)s"
 
-#: forms.py:37
+#: forms.py:38
 #, python-format
 msgid ""
 "Your file is too big (%(size)s), the maximum allowed size is %"
@@ -34,7 +34,7 @@ msgid ""
 msgstr ""
 "Die Datei ist zu groß (%(size)s), die Maximalgröße ist %(max_valid_size)s"
 
-#: forms.py:43
+#: forms.py:44
 #, python-format
 msgid ""
 "You already have %(nb_avatars)d avatars, and the maximum allowed is %"
@@ -43,20 +43,26 @@ msgstr ""
 "Sie haben bereits %(nb_avatars)d Avatarbilder hochgeladen. Das maximale "
 "Anzahl ist %(nb_max_avatars)d."
 
-#: models.py:71
+#: models.py:80
 #, python-format
 msgid "Avatar for %s"
 msgstr "Avatar für %s"
 
-#: views.py:90
-msgid "Successfully uploaded a new avatar."
+#: views.py:91
+#, fuzzy
+msgid "Successfully uploaded avatar."
 msgstr "Erfolgreich einen neuen Avatar hochgeladen."
 
-#: views.py:128
+#: views.py:122
+#, fuzzy
+msgid "Successfully edited avatar."
+msgstr "Erfolgreich Ihren Avatar aktualisiert."
+
+#: views.py:174
 msgid "Successfully updated your avatar."
 msgstr "Erfolgreich Ihren Avatar aktualisiert."
 
-#: views.py:166
+#: views.py:212
 msgid "Successfully deleted the requested avatars."
 msgstr "Erfolgreich den Avatar gelöscht."
 
@@ -110,6 +116,23 @@ msgstr ""
 msgid "Delete These"
 msgstr "Auswahl löschen"
 
+#: templates/avatar/crop.html:36
+#, fuzzy
+msgid "Your current cropping:"
+msgstr "Ihr aktueller Avatar: "
+
+#: templates/avatar/crop.html:39
+msgid "Please crop your avatar:"
+msgstr ""
+
+#: templates/avatar/crop.html:41
+msgid "Preview:"
+msgstr ""
+
+#: templates/avatar/crop.html:46
+msgid "Save avatar"
+msgstr ""
+
 #: templates/notification/avatar_friend_updated/notice.html:2
 #, python-format
 msgid ""
@@ -126,6 +149,6 @@ msgstr ""
 "Sie haben Ihren Avatar aktualisiert <a href=\"%(avatar_url)s\">%(avatar)s</"
 "a>."
 
-#: templatetags/avatar_tags.py:40
+#: templatetags/avatar_tags.py:44
 msgid "Default Avatar"
 msgstr "Standard-Avatar"

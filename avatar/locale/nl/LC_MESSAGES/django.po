@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-02 15:51+0200\n"
+"POT-Creation-Date: 2010-08-05 15:38+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,20 +44,26 @@ msgstr ""
 "U heeft al %(nb_avatars)d profielfoto's, en het maximum aantal is %"
 "(nb_max_avatars)d."
 
-#: models.py:75
+#: models.py:80
 #, python-format
 msgid "Avatar for %s"
 msgstr "Profielfoto voor %s"
 
-#: views.py:89
-msgid "Successfully uploaded a new avatar."
+#: views.py:91
+#, fuzzy
+msgid "Successfully uploaded avatar."
 msgstr "Profielfoto succesvol geupload."
 
-#: views.py:128
+#: views.py:122
+#, fuzzy
+msgid "Successfully edited avatar."
+msgstr "Profielfoto succesvol geupdate."
+
+#: views.py:174
 msgid "Successfully updated your avatar."
 msgstr "Profielfoto succesvol geupdate."
 
-#: views.py:166
+#: views.py:212
 msgid "Successfully deleted the requested avatars."
 msgstr "Profielfoto verwijderd."
 
@@ -110,19 +116,37 @@ msgstr ""
 msgid "Delete These"
 msgstr "Verwijder deze"
 
+#: templates/avatar/crop.html:36
+#, fuzzy
+msgid "Your current cropping:"
+msgstr "Uw huidige profielfoto: "
+
+#: templates/avatar/crop.html:39
+msgid "Please crop your avatar:"
+msgstr "Verklein uw avatar:"
+
+#: templates/avatar/crop.html:41
+msgid "Preview:"
+msgstr "Voorbeeld:"
+
+#: templates/avatar/crop.html:46
+msgid "Save avatar"
+msgstr "Avatar opslaan"
+
 #: templates/notification/avatar_friend_updated/notice.html:2
 #, python-format
 msgid ""
 "<a href=\"%(user_url)s\">%(avatar_creator)s</a> has updated their avatar <a "
 "href=\"%(avatar_url)s\">%(avatar)s</a>."
 msgstr ""
-"<a href=\"%(user_url)s\">%(avatar_creator)s</a> heeft zijn profielfoto aangepast <a "
-"href=\"%(avatar_url)s\">%(avatar)s</a>."
+"<a href=\"%(user_url)s\">%(avatar_creator)s</a> heeft zijn profielfoto "
+"aangepast <a href=\"%(avatar_url)s\">%(avatar)s</a>."
 
 #: templates/notification/avatar_updated/notice.html:2
 #, python-format
 msgid "You have updated your avatar <a href=\"%(avatar_url)s\">%(avatar)s</a>."
-msgstr "U heft uw profielfoto aangepast <a href=\"%(avatar_url)s\">%(avatar)s</a>."
+msgstr ""
+"U heft uw profielfoto aangepast <a href=\"%(avatar_url)s\">%(avatar)s</a>."
 
 #: templatetags/avatar_tags.py:44
 msgid "Default Avatar"
