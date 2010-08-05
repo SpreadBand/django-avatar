@@ -122,10 +122,10 @@ class Avatar(models.Model):
         quality = quality or AVATAR_THUMB_QUALITY
 
         (w, h) = image.size
-        if w == size and h == size and not self.has_crop:
+        if w == size and h == size and not self.has_crop():
             thumb_file = ContentFile(orig)
         else:
-            if self.has_crop:
+            if self.has_crop():
                 image = image.crop((self.crop_left, self.crop_top, self.crop_right, self.crop_bottom))
             else:
                 if w != size or h != size:
