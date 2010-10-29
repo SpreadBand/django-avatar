@@ -78,6 +78,6 @@ def render_orig_avatar(avatar, display_size):
 
 @cache_result
 @register.simple_tag
-def render_crop_preview(avatar, preview_size):
-    return """<div class="avatar_crop_preview" style="width:%dpx; height:%dpx; overflow:hidden;"><img src="%s" alt="%s" id="crop_preview"/></div>""" % (
-        preview_size[0], preview_size[1], avatar.avatar.url, str(avatar)+" preview")
+def render_crop_preview(avatar, height, width, image_id="crop_preview"):
+    return """<div class="avatar_crop_preview" style="width:%dpx; height:%dpx; overflow:hidden;"><img src="%s" alt="%s" id="%s"/></div>""" % (
+        height, width, avatar.avatar.url, str(avatar)+" preview", image_id)
