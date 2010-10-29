@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
 
 from django.template import RequestContext
@@ -10,11 +10,11 @@ from django.contrib.auth.decorators import login_required
 
 from avatar.forms import PrimaryAvatarForm, DeleteAvatarForm, UploadAvatarForm, CropAvatarForm
 from avatar.models import Avatar
-from avatar.settings import AVATAR_MAX_AVATARS_PER_USER, AVATAR_DEFAULT_SIZE, AVATAR_CROP_VIEW_SIZE
+from avatar.settings import AVATAR_MAX_AVATARS_PER_USER, AVATAR_DEFAULT_SIZE, AVATAR_CROP_VIEW_SIZE, AVATAR_SEND_NOTIFICATIONS
 from avatar.util import get_primary_avatar, get_default_avatar_url
 
 notification = False
-if 'notification' in settings.INSTALLED_APPS:
+if AVATAR_SEND_NOTIFICATIONS and 'notification' in settings.INSTALLED_APPS:
     from notification import models as notification
 
 friends = False
@@ -222,6 +222,24 @@ def delete(request, extra_context=None, next_override=None, *args, **kwargs):
               'next': next_override or _get_next(request), }
         )
     )
+
+
+def change_crop_delete(request, *args, **kwargs):
+    """
+    Dispatch a command based on an action
+    """
+    if request.POST.get('change', False):
+        change(request, *args, **kwargs)
+        return redirect('avatar_change')
+         
+    elif request.POST.get('crop', False):
+        return redirect('avatar_crop', request.POST.get('choice'))
+
+    elif request.POST.get('delete', False):
+        return redirect('avatar_delete')
+
+    return redirect('avatar_change')
+        
     
 def render_primary(request, extra_context={}, user=None, size=AVATAR_DEFAULT_SIZE, *args, **kwargs):
     size = int(size)
