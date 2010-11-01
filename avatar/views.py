@@ -115,11 +115,11 @@ def crop(request, avatar_id, extra_context=None, next_override=None,
 
     if request.method == "POST":
         if crop_avatar_form.is_valid():
-            print "POST", request.POST
             avatar.set_crop(request.POST)
             avatar.save()
             request.user.message_set.create(
                 message=_("Successfully edited avatar."))
+
             if notification:
                 _notification_updated(request, avatar)
             return HttpResponseRedirect(next_override or _get_next(request))
@@ -223,7 +223,7 @@ def delete(request, extra_context=None, next_override=None, *args, **kwargs):
         )
     )
 
-
+@login_required
 def change_crop_delete(request, *args, **kwargs):
     """
     Dispatch a command based on an action
