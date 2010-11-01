@@ -1,12 +1,11 @@
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.core.urlresolvers import reverse
-
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
-from django.conf import settings
-
-from django.contrib.auth.decorators import login_required
 
 from avatar.forms import PrimaryAvatarForm, DeleteAvatarForm, UploadAvatarForm, CropAvatarForm
 from avatar.models import Avatar
@@ -87,8 +86,9 @@ def add(request, extra_context=None, next_override=None,
             image_file = request.FILES['avatar']
             avatar.avatar.save(image_file.name, image_file)
             avatar.save()
-            request.user.message_set.create(
-                message=_("Successfully uploaded avatar."))
+            messages.success(request,
+                             _("Successfully uploaded avatar.")
+                             )
             if notification:
                 _notification_updated(request, avatar)
             return HttpResponseRedirect(next_override or _get_next(request))
@@ -117,8 +117,9 @@ def crop(request, avatar_id, extra_context=None, next_override=None,
         if crop_avatar_form.is_valid():
             avatar.set_crop(request.POST)
             avatar.save()
-            request.user.message_set.create(
-                message=_("Successfully edited avatar."))
+            messages.success(request,
+                             _("Successfully edited avatar.")
+                             )
 
             if notification:
                 _notification_updated(request, avatar)
@@ -170,8 +171,9 @@ def change(request, extra_context=None, next_override=None,
             avatar.primary = True
             avatar.save()
             updated = True
-            request.user.message_set.create(
-                message=_("Successfully updated your avatar."))
+            messages.success(request,
+                             _("Successfully updated your avatar.")
+                             )
         if updated and notification:
             _notification_updated(request, avatar)
         return HttpResponseRedirect(next_override or _get_next(request))
@@ -208,8 +210,9 @@ def delete(request, extra_context=None, next_override=None, *args, **kwargs):
                             _notification_updated(request, a)
                         break
             Avatar.objects.filter(id__in=ids).delete()
-            request.user.message_set.create(
-                message=_("Successfully deleted the requested avatars."))
+            messages.success(request,
+                             _("Successfully deleted the requested avatars.")
+                             )
             return HttpResponseRedirect(next_override or _get_next(request))
     return render_to_response(
         'avatar/confirm_delete.html',
