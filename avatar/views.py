@@ -10,7 +10,7 @@ from django.utils.translation import ugettext as _
 from avatar.forms import PrimaryAvatarForm, DeleteAvatarForm, UploadAvatarForm, CropAvatarForm
 from avatar.models import Avatar
 from avatar.settings import AVATAR_MAX_AVATARS_PER_USER, AVATAR_DEFAULT_SIZE, AVATAR_CROP_VIEW_SIZE, AVATAR_SEND_NOTIFICATIONS
-from avatar.util import get_primary_avatar, get_default_avatar_url
+from avatar.util import get_primary_avatar, get_default_avatar_url, invalidate_cache
 
 notification = False
 if AVATAR_SEND_NOTIFICATIONS and 'notification' in settings.INSTALLED_APPS:
@@ -117,6 +117,10 @@ def crop(request, avatar_id, extra_context=None, next_override=None,
         if crop_avatar_form.is_valid():
             avatar.set_crop(request.POST)
             avatar.save()
+
+            # Invalidate the cache to prevent wrong avatar appearing
+            invalidate_cache(request.user)
+
             messages.success(request,
                              _("Successfully edited avatar.")
                              )
@@ -171,6 +175,10 @@ def change(request, extra_context=None, next_override=None,
             avatar.primary = True
             avatar.save()
             updated = True
+
+            # Invalidate the cache to prevent wrong avatar appearing
+            invalidate_cache(request.user)
+
             messages.success(request,
                              _("Successfully updated your avatar.")
                              )
@@ -210,6 +218,11 @@ def delete(request, extra_context=None, next_override=None, *args, **kwargs):
                             _notification_updated(request, a)
                         break
             Avatar.objects.filter(id__in=ids).delete()
+
+            # Invalidate the cache to prevent wrong avatar appearing
+            # when only one's left
+            invalidate_cache(request.user)
+
             messages.success(request,
                              _("Successfully deleted the requested avatars.")
                              )
